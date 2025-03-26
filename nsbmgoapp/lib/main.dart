@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 import 'addevent.dart';
+import 'dart:math';
+import 'event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +42,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 2;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Random _random = Random();
 
   @override
   Widget build(BuildContext context) {
@@ -88,15 +91,34 @@ class _HomePageState extends State<HomePage> {
                   return Center(child: Text('No events found'));
                 }
 
+                var allEvents = snapshot.data!.docs;
+
+                if (allEvents.length <= 3) {
+                  return ListView.builder(
+                    itemCount: allEvents.length,
+                    itemBuilder: (context, index) {
+                      final event = allEvents[index].data() as Map<String, dynamic>;
+                      return _buildEventCard(
+                        context,
+                        event,
+                      );
+                    },
+                  );
+                }
+
+                Set<int> randomIndices = {};
+                while (randomIndices.length < 3) {
+                  randomIndices.add(_random.nextInt(allEvents.length));
+                }
+
                 return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: 3,
                   itemBuilder: (context, index) {
-                    final event = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                    final eventIndex = randomIndices.elementAt(index);
+                    final event = allEvents[eventIndex].data() as Map<String, dynamic>;
                     return _buildEventCard(
                       context,
-                      event['imageUrl'] ?? "assets/placeholder.jpg",
-                      event['eventName'] ?? "Event Name",
-                      event['description'] ?? "Event Description",
+                      event,
                     );
                   },
                 );
@@ -120,22 +142,28 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NSBMHomePage()),
+      );
+      return;
+    }
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  Widget _buildEventCard(BuildContext context, String imagePath, String title, String description) {
+  Widget _buildEventCard(BuildContext context, Map<String, dynamic> event) {
+    final dateTime = (event['dateandtime'] as Timestamp).toDate();
+    final formattedDate = "${dateTime.day} ${_getMonthName(dateTime.month)} ${dateTime.year}";
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EventDetailPage(
-              imagePath: imagePath,
-              title: title,
-              description: description,
-            ),
+            builder: (context) => EventDetailsPage(eventData: event),
           ),
         );
       },
@@ -151,7 +179,7 @@ class _HomePageState extends State<HomePage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
-                  imagePath,
+                  event['image'],
                   fit: BoxFit.cover,
                   height: 200,
                   width: double.infinity,
@@ -182,16 +210,32 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      event['name'],
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
+                    SizedBox(height: 4),
+                    Text(
+                      formattedDate,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      event['venue'],
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
+                    ),
                     SizedBox(height: 8),
                     Text(
-                      description,
+                      event['description'],
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -208,89 +252,12 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
 
-class EventDetailPage extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String description;
-
-  const EventDetailPage({
-    Key? key,
-    required this.imagePath,
-    required this.title,
-    required this.description,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Hero(
-              tag: imagePath,
-              child: Image.network(
-                imagePath,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 250,
-                errorBuilder: (context, error, stackTrace) =>
-                    Image.asset("assets/placeholder.jpg", fit: BoxFit.cover, height: 250),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    description,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700],
-                      height: 1.5,
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        'Register Now',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  String _getMonthName(int month) {
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return months[month - 1];
   }
 }

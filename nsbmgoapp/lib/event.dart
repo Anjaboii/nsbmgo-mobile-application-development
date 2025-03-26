@@ -1,156 +1,290 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+class EventDetailsPage extends StatelessWidget {
+  final Map<String, dynamic> eventData;
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const EventDetailsPage({Key? key, required this.eventData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'NSBM Events',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
+    final dateTime = (eventData['dateandtime'] as Timestamp).toDate();
+    final createdAt = (eventData['createdAt'] as Timestamp).toDate();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(eventData['name']),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
-      home: const NSBMHomePage(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (eventData['image'] != null && eventData['image'].isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  eventData['image'],
+                  width: double.infinity,
+                  height: 250,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Container(
+                        height: 250,
+                        color: Colors.grey[200],
+                        child: Icon(Icons.error, size: 50),
+                      ),
+                ),
+              ),
+            const SizedBox(height: 20),
+            Text(
+              eventData['name'],
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  DateFormat('d MMMM yyyy, h:mm a').format(dateTime),
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.location_on, size: 16, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  eventData['venue'],
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.person, size: 16, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  'Organized by ${eventData['organizerName']}',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.email, size: 16, color: Colors.grey),
+                SizedBox(width: 8),
+                Text(
+                  eventData['organizermail'],
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Description',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              eventData['description'],
+              style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  'Register Now',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Event Created',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              DateFormat('d MMMM yyyy, h:mm a').format(createdAt),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class NSBMHomePage extends StatelessWidget {
-  const NSBMHomePage({super.key});
+class NSBMHomePage extends StatefulWidget {
+  const NSBMHomePage({Key? key}) : super(key: key);
 
-  final List<Map<String, String>> events = const [
-    {'title': 'SPORTS FIESTA', 'image': 'assets/SF.jpg'},
-    {'title': 'SIYAPATHSIYA UDANAYA', 'image': 'assets/SP.jpg'},
-    {'title': 'NSBM PIRITH CHANTING', 'image': 'assets/PC.png'},
-    {'title': 'GREEN FIESTA', 'image': 'assets/NF.jpg'},
-  ];
+  @override
+  _NSBMHomePageState createState() => _NSBMHomePageState();
+}
 
+class _NSBMHomePageState extends State<NSBMHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        toolbarHeight: 120,
+        leadingWidth: 150,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Image.asset('assets/nsbmlogo.png', height: 30),
+          padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
+          child: Image.asset(
+            "assets/logo.jpg",
+            fit: BoxFit.contain,
+          ),
         ),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'NSBM Event',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'All Events',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('events')
+                    .orderBy('dateandtime', descending: false)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
 
-            // Top Row (2 Events)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                EventCard(title: events[0]['title']!, image: events[0]['image']!),
-                EventCard(title: events[1]['title']!, image: events[1]['image']!),
-              ],
-            ),
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            const SizedBox(height: 10),
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('No events found'));
+                  }
 
-            // Centered NSBM COLOURS
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                'assets/CL.png', // Centered event
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      final event = snapshot.data!.docs[index];
+                      final eventData = event.data() as Map<String, dynamic>;
+                      final dateTime = (eventData['dateandtime'] as Timestamp).toDate();
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EventDetailsPage(eventData: eventData),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (eventData['image'] != null && eventData['image'].isNotEmpty)
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      eventData['image'],
+                                      width: double.infinity,
+                                      height: 150,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          Container(
+                                            height: 150,
+                                            color: Colors.grey[200],
+                                            child: Icon(Icons.error, size: 40),
+                                          ),
+                                    ),
+                                  ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  eventData['name'],
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      DateFormat('d MMMM yyyy, h:mm a').format(dateTime),
+                                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      eventData['venue'],
+                                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
-            ),
-            const SizedBox(height: 5),
-            const Text(
-              'NSBM COLOURS',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 10),
-
-            // Bottom Row (2 Events)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                EventCard(title: events[2]['title']!, image: events[2]['image']!),
-                EventCard(title: events[3]['title']!, image: events[3]['image']!),
-              ],
             ),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: [
-          BottomNavigationBarItem(
-            icon: Image.asset("assets/events_icon.png", height: 24),
-            label: "Events",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset("assets/clubs_icon.png", height: 24),
-            label: "Clubs",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset("assets/home_icon.png", height: 24),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset("assets/faculties_icon.png", height: 24),
-            label: "Faculties",
-          ),
-          BottomNavigationBarItem(
-            icon: Image.asset("assets/profile_icon.png", height: 24),
-            label: "Profile",
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class EventCard extends StatelessWidget {
-  final String title;
-  final String image;
-
-  const EventCard({super.key, required this.title, required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            image,
-            height: 100,
-            width: 140,
-            fit: BoxFit.cover,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class EventForm extends StatefulWidget {
   final Map<String, dynamic> organizerData;
@@ -13,30 +13,36 @@ class EventForm extends StatefulWidget {
 
 class _EventFormState extends State<EventForm> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _eventNameController = TextEditingController();
-  final TextEditingController _dateTimeController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _imageUrlController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  DateTime? _selectedDateTime;
+  final TextEditingController _venueController = TextEditingController();
+  final TextEditingController _imageController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _selectDateTime(BuildContext context) async {
-    DateTime? pickedDate = await showDatePicker(
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
+
     if (pickedDate != null) {
-      TimeOfDay? pickedTime = await showTimePicker(
+      final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
       );
+
       if (pickedTime != null) {
         setState(() {
-          String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
-          String formattedTime = pickedTime.format(context);
-          _dateTimeController.text = "$formattedDate $formattedTime";
+          _selectedDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
         });
       }
     }
@@ -44,26 +50,36 @@ class _EventFormState extends State<EventForm> {
 
   Future<void> _createEvent() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedDateTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select date and time')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
       await FirebaseFirestore.instance.collection('events').add({
-        'eventName': _eventNameController.text,
-        'dateTime': _dateTimeController.text,
-        'location': _locationController.text,
-        'imageUrl': _imageUrlController.text,
-        'description': _descriptionController.text,
-        'organizerId': widget.organizerData['email'],
+        'name': _nameController.text.trim(),
+        'dateandtime': Timestamp.fromDate(_selectedDateTime!),
+        'venue': _venueController.text.trim(),
+        'image': _imageController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'organizermail': widget.organizerData['email'],
         'organizerName': widget.organizerData['name'],
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Event created successfully!')),
+        const SnackBar(content: Text('Event created successfully!')),
       );
 
+      // Clear the form after successful submission
       _formKey.currentState!.reset();
+      setState(() {
+        _selectedDateTime = null;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error creating event: ${e.toString()}')),
@@ -74,155 +90,167 @@ class _EventFormState extends State<EventForm> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _venueController.dispose();
+    _imageController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Create New Event",
-            style: TextStyle(color: Colors.black)),
+        title: const Text('Create New Event'),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Image.network(
-                    "https://via.placeholder.com/120x50",
-                    height: 50,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: Text(
+                  'NSBM Special Event Details',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 10),
-                Text("Please enter the details of the event below.",
-                    style: TextStyle(fontSize: 14)),
-                SizedBox(height: 20),
-                _buildLabel("Event Name"),
-                _buildTextField(
-                  _eventNameController,
-                  hintText: "Enter event name",
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter event name';
-                    }
-                    return null;
-                  },
-                ),
-                _buildLabel("Date & Time"),
-                _buildDateTimeField(context),
-                _buildLabel("Location"),
-                _buildTextField(
-                  _locationController,
-                  hintText: "Enter event location",
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter location';
-                    }
-                    return null;
-                  },
-                ),
-                _buildLabel("Image URL"),
-                _buildTextField(
-                  _imageUrlController,
-                  hintText: "Enter image URL (optional)",
-                ),
-                _buildLabel("Description"),
-                _buildTextField(
-                  _descriptionController,
-                  hintText: "Enter event description",
-                  maxLines: 3,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter description';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _createEvent,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[300],
-                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20)),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Please enter the details of the event below.',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 20),
+              _buildTextField('Event Name', _nameController, isRequired: true),
+              const SizedBox(height: 20),
+              _buildDateTimeField(context),
+              const SizedBox(height: 20),
+              _buildTextField('Venue', _venueController, isRequired: true),
+              const SizedBox(height: 20),
+              _buildTextField('Image URL', _imageController),
+              const SizedBox(height: 20),
+              _buildDescriptionField(),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _createEvent,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    child: _isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : Text("Create Event",
-                        style: TextStyle(color: Colors.black, fontSize: 16)),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                    'Create Event',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 5),
-      child: Text(text,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-    );
-  }
-
-  Widget _buildTextField(
-      TextEditingController controller, {
-        int maxLines = 1,
-        String? hintText,
-        String? Function(String?)? validator,
-      }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.green[200],
-        hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+  Widget _buildTextField(String label, TextEditingController controller,
+      {bool isRequired = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-      ),
-      validator: validator,
+        const SizedBox(height: 5),
+        TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+          ),
+          validator: isRequired
+              ? (value) {
+            if (value == null || value.isEmpty) {
+              return 'This field is required';
+            }
+            return null;
+          }
+              : null,
+        ),
+      ],
     );
   }
 
   Widget _buildDateTimeField(BuildContext context) {
-    return TextFormField(
-      controller: _dateTimeController,
-      readOnly: true,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.green[200],
-        hintText: "Select date and time",
-        suffixIcon: IconButton(
-          icon: Icon(Icons.calendar_today),
-          onPressed: () => _selectDateTime(context),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Date & Time',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+        const SizedBox(height: 5),
+        InkWell(
+          onTap: () => _selectDateTime(context),
+          child: InputDecorator(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _selectedDateTime != null
+                      ? DateFormat('d MMMM yyyy, h:mm a').format(_selectedDateTime!)
+                      : 'Select date and time',
+                ),
+                const Icon(Icons.calendar_today),
+              ],
+            ),
+          ),
         ),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select date and time';
-        }
-        return null;
-      },
+      ],
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Description',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 5),
+        TextFormField(
+          controller: _descriptionController,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            alignLabelWithHint: true,
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter description';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 }
