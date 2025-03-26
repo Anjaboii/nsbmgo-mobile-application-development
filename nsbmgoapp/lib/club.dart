@@ -23,17 +23,25 @@ class ClubsPage extends StatefulWidget {
 
 class _ClubsPageState extends State<ClubsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  String _selectedCategory = 'INTERNATIONAL CLUBS';
+  String _selectedCategory = 'ACTIVITY BASED CLUBS';
   int _selectedIndex = 1; // Clubs is selected by default
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Clubs and Societies'),
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        toolbarHeight: 120,
+        leadingWidth: 150,
+        leading: Padding(
+          padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
+          child: Image.asset(
+            "assets/logo.jpg",
+            fit: BoxFit.contain,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -140,7 +148,7 @@ class _ClubsPageState extends State<ClubsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Categories',
+            'Clubs & Societies',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
@@ -148,9 +156,9 @@ class _ClubsPageState extends State<ClubsPage> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildCategoryChip('INTERNATIONAL CLUBS'),
-                const SizedBox(width: 8),
                 _buildCategoryChip('ACTIVITY BASED CLUBS'),
+                const SizedBox(width: 8),
+                _buildCategoryChip('INTERNATIONAL CLUBS'),
                 const SizedBox(width: 8),
                 _buildCategoryChip('RELIGIOUS CLUBS'),
                 const SizedBox(width: 8),
@@ -246,15 +254,7 @@ class _ClubsPageState extends State<ClubsPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.person, size: 14, color: Colors.grey),
                         const SizedBox(width: 4),
-                        Text(
-                          ' ${club['createdBy'] ?? 'Unknown'}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
                         const Spacer(),
                         Text(
                           formattedDate,
@@ -383,20 +383,6 @@ class ClubDetailsPage extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 20),
-            const Text(
-              'Club Created',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-            Text(
-              formattedDate,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
           ],
         ),
       ),
