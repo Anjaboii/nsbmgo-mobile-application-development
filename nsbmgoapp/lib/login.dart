@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
 import 'addevent.dart';
+import 'clubmanager.dart'; // Import the ClubManagerPage
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -10,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isStudent = true;
+  int selectedUserType = 0; // 0 = Student, 1 = Event Organizer, 2 = Club Manager
   bool obscurePassword = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -30,69 +31,103 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
 
-      if (isStudent) {
-        // Student login
-        final querySnapshot = await FirebaseFirestore.instance
-            .collection('student')
-            .where('email', isEqualTo: email)
-            .limit(1)
-            .get();
+      String collectionName;
+      Widget destination;
 
-        if (querySnapshot.docs.isEmpty) {
-          throw FirebaseAuthException(
-            code: 'user-not-found',
-            message: 'No student found with that email.',
-          );
-        }
+      switch (selectedUserType) {
+        case 0: // Student
+          collectionName = 'student';
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection(collectionName)
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
 
-        final studentDoc = querySnapshot.docs.first;
-        final studentData = studentDoc.data();
+          if (querySnapshot.docs.isEmpty) {
+            throw FirebaseAuthException(
+              code: 'user-not-found',
+              message: 'No student found with that email.',
+            );
+          }
 
-        if (studentData['password'] != password) {
-          throw FirebaseAuthException(
-            code: 'wrong-password',
-            message: 'Incorrect password.',
-          );
-        }
+          final userDoc = querySnapshot.docs.first;
+          final userData = userDoc.data();
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(studentData: studentData),
-          ),
-        );
-      } else {
-        // Event Organizer login
-        final querySnapshot = await FirebaseFirestore.instance
-            .collection('eventorganizer')
-            .where('email', isEqualTo: email)
-            .limit(1)
-            .get();
+          if (userData['password'] != password) {
+            throw FirebaseAuthException(
+              code: 'wrong-password',
+              message: 'Incorrect password.',
+            );
+          }
 
-        if (querySnapshot.docs.isEmpty) {
-          throw FirebaseAuthException(
-            code: 'user-not-found',
-            message: 'No organizer found with that email.',
-          );
-        }
+          destination = HomePage(studentData: userData);
+          break;
 
-        final organizerDoc = querySnapshot.docs.first;
-        final organizerData = organizerDoc.data();
+        case 1: // Event Organizer
+          collectionName = 'eventorganizer';
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection(collectionName)
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
 
-        if (organizerData['password'] != password) {
-          throw FirebaseAuthException(
-            code: 'wrong-password',
-            message: 'Incorrect password.',
-          );
-        }
+          if (querySnapshot.docs.isEmpty) {
+            throw FirebaseAuthException(
+              code: 'user-not-found',
+              message: 'No organizer found with that email.',
+            );
+          }
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => EventForm(organizerData: organizerData),
-          ),
-        );
+          final userDoc = querySnapshot.docs.first;
+          final userData = userDoc.data();
+
+          if (userData['password'] != password) {
+            throw FirebaseAuthException(
+              code: 'wrong-password',
+              message: 'Incorrect password.',
+            );
+          }
+
+          destination = EventForm(organizerData: userData);
+          break;
+
+        case 2: // Club Manager
+          collectionName = 'clubmanager';
+          final querySnapshot = await FirebaseFirestore.instance
+              .collection(collectionName)
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
+
+          if (querySnapshot.docs.isEmpty) {
+            throw FirebaseAuthException(
+              code: 'user-not-found',
+              message: 'No club manager found with that email.',
+            );
+          }
+
+          final userDoc = querySnapshot.docs.first;
+          final userData = userDoc.data();
+
+          if (userData['password'] != password) {
+            throw FirebaseAuthException(
+              code: 'wrong-password',
+              message: 'Incorrect password.',
+            );
+          }
+
+          // Redirect to ClubManagerPage with the manager's data
+          destination = ClubManagerPage(managerData: userData);
+          break;
+
+        default:
+          throw Exception('Invalid user type selected');
       }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => destination),
+      );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message ?? 'Authentication failed')),
@@ -129,13 +164,11 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 20),
               Row(
                 children: [
-                  Expanded(
-                    child: _buildToggleButton('Student', isStudent),
-                  ),
+                  Expanded(child: _buildToggleButton('Student', 0)),
                   SizedBox(width: 10),
-                  Expanded(
-                    child: _buildToggleButton('Organizer', !isStudent),
-                  ),
+                  Expanded(child: _buildToggleButton('Organizer', 1)),
+                  SizedBox(width: 10),
+                  Expanded(child: _buildToggleButton('Club Manager', 2)),
                 ],
               ),
               SizedBox(height: 20),
@@ -151,27 +184,42 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildToggleButton(String text, bool isSelected) {
+  Widget _buildToggleButton(String text, int userType) {
     return ElevatedButton(
-      onPressed: () => setState(() => isStudent = text == 'Student'),
+      onPressed: () => setState(() => selectedUserType = userType),
       style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.green : Colors.grey[300],
+        backgroundColor: selectedUserType == userType ? Colors.green : Colors.grey[300],
         padding: EdgeInsets.symmetric(vertical: 15),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: isSelected ? Colors.white : Colors.black,
+          color: selectedUserType == userType ? Colors.white : Colors.black,
         ),
       ),
     );
   }
 
   Widget _buildEmailField() {
+    String labelText;
+    switch (selectedUserType) {
+      case 0:
+        labelText = 'Student Email';
+        break;
+      case 1:
+        labelText = 'Organizer Email';
+        break;
+      case 2:
+        labelText = 'Club Manager Email';
+        break;
+      default:
+        labelText = 'Email';
+    }
+
     return TextField(
       controller: _emailController,
       decoration: InputDecoration(
-        labelText: isStudent ? 'Student Email' : 'Organizer Email',
+        labelText: labelText,
         prefixIcon: Icon(Icons.email),
         border: OutlineInputBorder(),
       ),
