@@ -5,6 +5,7 @@ import 'login.dart';
 import 'addevent.dart';
 import 'dart:math';
 import 'event.dart';
+import 'club.dart'; // Adjust the path if necessary
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       home: LoginScreen(),
       routes: {
         '/home': (context) => HomePage(),
-        '/addEvent': (context) => EventForm(organizerData: {}),
+        '/addEvent': (context) => EventForm(organizerData: {})
       },
     );
   }
@@ -144,6 +145,12 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => NSBMHomePage()),
+      );
+      return;
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ClubsPage()),
       );
       return;
     }
