@@ -90,6 +90,7 @@ flutter:
     - assets\CL.png
     - assets\SF.jpg
     - assets\NF.jpg
+    - assets\logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
