@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'main.dart'; // Make sure to import your home page file
+import 'event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +24,7 @@ class ClubsPage extends StatefulWidget {
 class _ClubsPageState extends State<ClubsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _selectedCategory = 'INTERNATIONAL CLUBS';
+  int _selectedIndex = 1; // Clubs is selected by default
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,70 @@ class _ClubsPageState extends State<ClubsPage> {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/events_icon.png", height: 24),
+            label: "Events",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/clubs_icon.png", height: 24),
+            label: "Clubs",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/home_icon.png", height: 24),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/people.png", height: 24),
+            label: "Faculties",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/profile_icon.png", height: 24),
+            label: "Profile",
+          ),
+        ],
+      ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return; // Already on this page
+
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0: // Events
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => NSBMHomePage()),
+        );
+        break;
+      case 1: // Clubs - do nothing, we're already here
+        break;
+      case 2: // Home
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+        break;
+      case 3: // Faculties
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => FacultiesPage()),
+      // );
+        break;
+      case 4: // Profile
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => ProfilePage()),
+      // );
+        break;
+    }
   }
 
   Widget _buildCategorySelector() {

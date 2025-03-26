@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'main.dart'; // Import main.dart to access HomePage
+import 'club.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> eventData;
@@ -107,38 +108,6 @@ class EventDetailsPage extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.5),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  'Register Now',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Event Created',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-            Text(
-              DateFormat('d MMMM yyyy, h:mm a').format(createdAt),
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
           ],
         ),
       ),
@@ -163,6 +132,11 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
         MaterialPageRoute(builder: (context) => HomePage()),
       );
       return;
+      } else if (index == 1) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ClubsPage()),
+        );
     }
     setState(() {
       _selectedIndex = index;
@@ -308,7 +282,7 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
           BottomNavigationBarItem(icon: Image.asset("assets/events_icon.png", height: 24), label: "Events"),
           BottomNavigationBarItem(icon: Image.asset("assets/clubs_icon.png", height: 24), label: "Clubs"),
           BottomNavigationBarItem(icon: Image.asset("assets/home_icon.png", height: 24), label: "Home"),
-          BottomNavigationBarItem(icon: Image.asset("assets/faculties_icon.png", height: 24), label: "Faculties"),
+          BottomNavigationBarItem(icon: Image.asset("assets/people.png", height: 24), label: "Faculties"),
           BottomNavigationBarItem(icon: Image.asset("assets/profile_icon.png", height: 24), label: "Profile"),
         ],
       ),

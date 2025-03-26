@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Image.asset("assets/events_icon.png", height: 24), label: "Events"),
           BottomNavigationBarItem(icon: Image.asset("assets/clubs_icon.png", height: 24), label: "Clubs"),
           BottomNavigationBarItem(icon: Image.asset("assets/home_icon.png", height: 24), label: "Home"),
-          BottomNavigationBarItem(icon: Image.asset("assets/faculties_icon.png", height: 24), label: "Faculties"),
+          BottomNavigationBarItem(icon: Image.asset("assets/people.png", height: 24), label: "Faculties"),
           BottomNavigationBarItem(icon: Image.asset("assets/profile_icon.png", height: 24), label: "Profile"),
         ],
       ),
