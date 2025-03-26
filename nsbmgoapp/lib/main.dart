@@ -70,10 +70,8 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("What's Happening",
+                Text("Lastest Events",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Text("See all",
-                    style: TextStyle(color: Colors.blue, fontSize: 16)),
               ],
             ),
           ),

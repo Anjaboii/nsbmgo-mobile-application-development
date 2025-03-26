@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'main.dart'; // Import main.dart to access HomePage
 
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> eventData;
@@ -153,6 +154,21 @@ class NSBMHomePage extends StatefulWidget {
 }
 
 class _NSBMHomePageState extends State<NSBMHomePage> {
+  int _selectedIndex = 0; // Events is selected by default
+
+  void _onItemTapped(int index) {
+    if (index == 2) { // Home button index
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+      return;
+    }
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -284,6 +300,17 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(icon: Image.asset("assets/events_icon.png", height: 24), label: "Events"),
+          BottomNavigationBarItem(icon: Image.asset("assets/clubs_icon.png", height: 24), label: "Clubs"),
+          BottomNavigationBarItem(icon: Image.asset("assets/home_icon.png", height: 24), label: "Home"),
+          BottomNavigationBarItem(icon: Image.asset("assets/faculties_icon.png", height: 24), label: "Faculties"),
+          BottomNavigationBarItem(icon: Image.asset("assets/profile_icon.png", height: 24), label: "Profile"),
+        ],
       ),
     );
   }
