@@ -3,22 +3,54 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'main.dart';
 import 'addevent.dart';
-import 'clubmanager.dart'; // Import the ClubManagerPage
+import 'clubmanager.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  int selectedUserType = 0; // 0 = Student, 1 = Event Organizer, 2 = Club Manager
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+  int selectedUserType = 0;
   bool obscurePassword = true;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: Offset(0.0, 0.2),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -116,7 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }
 
-          // Redirect to ClubManagerPage with the manager's data
           destination = ClubManagerPage(managerData: userData);
           break;
 
@@ -126,7 +157,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => destination),
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => destination,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          transitionDuration: Duration(milliseconds: 500),
+        ),
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,6 +178,16 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  void _changeUserType(int type) {
+    if (selectedUserType != type) {
+      setState(() {
+        selectedUserType = type;
+        _animationController.reset();
+        _animationController.forward();
+      });
     }
   }
 
@@ -172,11 +222,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               SizedBox(height: 20),
-              _buildEmailField(),
+              SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: _buildEmailField(),
+                ),
+              ),
               SizedBox(height: 15),
-              _buildPasswordField(),
+              SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: _buildPasswordField(),
+                ),
+              ),
               SizedBox(height: 30),
-              _buildLoginButton(),
+              SlideTransition(
+                position: _slideAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: _buildLoginButton(),
+                ),
+              ),
             ],
           ),
         ),
@@ -186,15 +254,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildToggleButton(String text, int userType) {
     return ElevatedButton(
-      onPressed: () => setState(() => selectedUserType = userType),
+      onPressed: () => _changeUserType(userType),
       style: ElevatedButton.styleFrom(
         backgroundColor: selectedUserType == userType ? Colors.green : Colors.grey[300],
         padding: EdgeInsets.symmetric(vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: selectedUserType == userType ? Colors.white : Colors.black,
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 200),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return ScaleTransition(scale: animation, child: child);
+        },
+        child: Text(
+          text,
+          key: ValueKey<int>(userType),
+          style: TextStyle(
+            color: selectedUserType == userType ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );
