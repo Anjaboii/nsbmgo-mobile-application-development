@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'event.dart' as event_lib;
 import 'club.dart' as club_lib;
 import 'aboutus.dart' as aboutus_lib;
+import 'login.dart'; // Import the login screen
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -59,6 +60,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    try {
+      await _auth.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing out: ${e.toString()}')),
+      );
+    }
+  }
+
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.push(
@@ -91,6 +107,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        automaticallyImplyLeading: false, // This removes the back button
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.red),
+            onPressed: _logout,
+          ),
+        ],
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _errorMessage.isNotEmpty
@@ -136,9 +163,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           // Profile Header with larger photo moved down
           Container(
-            padding: EdgeInsets.only(top: 50, bottom: 30, left: 20, right: 20),
+            padding: EdgeInsets.only(top: 20, bottom: 30, left: 20, right: 20), // Adjusted top padding
             decoration: BoxDecoration(
-              color: Color(0xFF4CAF50),
+              color: Color(0xFFA8D5A1),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -162,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : Icon(
                       Icons.person,
                       size: 80,  // Increased size
-                      color: Color(0xFF9AD3A1),
+                      color: Color(0xFFA8D5A1),
                     ),
                   ),
                 ),
@@ -247,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: ListTile(
-        leading: Icon(icon, color: Color(0xFF4CAF50), size: 32),  // Larger icon
+        leading: Icon(icon, color: Color(0xFF000000), size: 32),  // Larger icon
         title: Text(
           title,
           style: TextStyle(

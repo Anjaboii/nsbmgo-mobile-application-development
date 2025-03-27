@@ -198,10 +198,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('assets/logo.jpg', height: 100),
+              Image.asset('assets/logo.png', height: 120),
               SizedBox(height: 30),
               Text(
-                'Login to NSBM Events',
+                'Login to NSBM Go',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -296,7 +296,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: Icon(Icons.email),
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0), // Increased from default
+        ),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
       ),
       keyboardType: TextInputType.emailAddress,
     );
@@ -315,7 +318,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           ),
           onPressed: () => setState(() => obscurePassword = !obscurePassword),
         ),
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0), // Increased from default
+        ),
+        contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
       ),
     );
   }
