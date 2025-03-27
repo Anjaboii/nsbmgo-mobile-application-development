@@ -6,6 +6,7 @@ import 'addevent.dart';
 import 'dart:math';
 import 'event.dart';
 import 'club.dart'; // Adjust the path if necessary
+import 'aboutus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -151,6 +152,13 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ClubsPage()),
+      );
+      return;
+    }
+    else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AboutUsScreen()),
       );
       return;
     }

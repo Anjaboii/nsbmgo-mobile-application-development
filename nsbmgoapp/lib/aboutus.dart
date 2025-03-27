@@ -1,23 +1,52 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
+import 'event.dart';
+import 'club.dart';
 
-class AboutUsScreen extends StatelessWidget {
+class AboutUsScreen extends StatefulWidget {
+  @override
+  _AboutUsScreenState createState() => _AboutUsScreenState();
+}
+
+class _AboutUsScreenState extends State<AboutUsScreen> {
+  int _selectedIndex = 3; // Faculties tab is selected (index 3)
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NSBMHomePage()),
+      );
+      return;
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ClubsPage()),
+      );
+      return;
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+      return;
+    }
+    else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AboutUsScreen()),
+      );
+      return;
+    }
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'About us',
-          style: TextStyle(color: Colors.black, fontSize: 16),
-        ),
-        centerTitle: true,
-      ),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -30,7 +59,7 @@ class AboutUsScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset('assets/nsbm_logo.png', height: 50), // Add your logo
+                Image.asset('assets/logo.png', height: 50),
                 SizedBox(height: 10),
                 Text(
                   'NSBM GO',
@@ -63,6 +92,32 @@ class AboutUsScreen extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/events_icon.png", height: 24),
+            label: "Events",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/clubs_icon.png", height: 24),
+            label: "Clubs",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/home_icon.png", height: 24),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/people.png", height: 24),
+            label: "Faculties",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/profile_icon.png", height: 24),
+            label: "Profile",
+          ),
+        ],
+      ),
     );
   }
 }
@@ -71,7 +126,7 @@ class ContactItem extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  ContactItem({required this.icon, required this.text});
+  const ContactItem({required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
