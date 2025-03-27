@@ -125,11 +125,18 @@ class NSBMHomePage extends StatefulWidget {
 }
 
 class _NSBMHomePageState extends State<NSBMHomePage> {
-  int _selectedIndex = 0; // Events is selected by default
+  int _selectedIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     if (index == 0) {
-      // Already on events page
       return;
     } else if (index == 1) {
       Navigator.pushReplacement(
@@ -183,6 +190,39 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Search Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search events...',
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                    icon: Icon(Icons.clear, color: Colors.grey),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _searchQuery = '';
+                      });
+                    },
+                  )
+                      : null,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value.toLowerCase();
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
             const Text(
               'All Events',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -207,10 +247,21 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
                     return const Center(child: Text('No events found'));
                   }
 
+                  // Filter events based on search query
+                  final filteredEvents = snapshot.data!.docs.where((doc) {
+                    final eventData = doc.data() as Map<String, dynamic>;
+                    final eventName = eventData['name'].toString().toLowerCase();
+                    return eventName.contains(_searchQuery);
+                  }).toList();
+
+                  if (filteredEvents.isEmpty) {
+                    return const Center(child: Text('No matching events found'));
+                  }
+
                   return ListView.builder(
-                    itemCount: snapshot.data!.docs.length,
+                    itemCount: filteredEvents.length,
                     itemBuilder: (context, index) {
-                      final event = snapshot.data!.docs[index];
+                      final event = filteredEvents[index];
                       final eventData = event.data() as Map<String, dynamic>;
                       final dateTime = (eventData['dateandtime'] as Timestamp).toDate();
 
@@ -296,25 +347,27 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarItem(
-            icon: Image.asset("assets/events_icon.png", height: 24),
+            icon: Image.asset("assets/events_icon.png", height: 24, color: Colors.black),
             label: "Events",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/clubs_icon.png", height: 24),
+            icon: Image.asset("assets/clubs_icon.png", height: 24, color: Colors.black),
             label: "Clubs",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/home_icon.png", height: 24),
+            icon: Image.asset("assets/home_icon.png", height: 24, color: Colors.black),
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/people.png", height: 24),
+            icon: Image.asset("assets/people.png", height: 24, color: Colors.black),
             label: "Faculties",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/profile_icon.png", height: 24),
+            icon: Image.asset("assets/profile_icon.png", height: 24, color: Colors.black),
             label: "Profile",
           ),
         ],
