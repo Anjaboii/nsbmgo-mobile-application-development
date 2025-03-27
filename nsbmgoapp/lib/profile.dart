@@ -203,11 +203,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _studentData!['email'] ?? 'No Email',
                 ),
                 _buildDetailCard(
-                  icon: Icons.cake,
-                  title: 'Date of Birth',
-                  value: formattedDate,
-                ),
-                _buildDetailCard(
                   icon: Icons.school,
                   title: 'Intake',
                   value: _studentData!['intake'] ?? 'No Intake',
