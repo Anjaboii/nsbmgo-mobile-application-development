@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'main.dart'; // Import main.dart to access HomePage
-import 'club.dart';
+import 'main.dart';
+import 'club.dart' as club_lib;
+import 'aboutus.dart' as aboutus_lib;
+import 'profile.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> eventData;
@@ -126,17 +128,33 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
   int _selectedIndex = 0; // Events is selected by default
 
   void _onItemTapped(int index) {
-    if (index == 2) { // Home button index
+    if (index == 0) {
+      // Already on events page
+      return;
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => club_lib.ClubsPage()),
+      );
+      return;
+    } else if (index == 2) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
       return;
-      } else if (index == 1) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ClubsPage()),
-        );
+    } else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => aboutus_lib.AboutUsScreen()),
+      );
+      return;
+    } else if (index == 4) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
+      );
+      return;
     }
     setState(() {
       _selectedIndex = index;
@@ -279,11 +297,26 @@ class _NSBMHomePageState extends State<NSBMHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: [
-          BottomNavigationBarItem(icon: Image.asset("assets/events_icon.png", height: 24), label: "Events"),
-          BottomNavigationBarItem(icon: Image.asset("assets/clubs_icon.png", height: 24), label: "Clubs"),
-          BottomNavigationBarItem(icon: Image.asset("assets/home_icon.png", height: 24), label: "Home"),
-          BottomNavigationBarItem(icon: Image.asset("assets/people.png", height: 24), label: "Faculties"),
-          BottomNavigationBarItem(icon: Image.asset("assets/profile_icon.png", height: 24), label: "Profile"),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/events_icon.png", height: 24),
+            label: "Events",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/clubs_icon.png", height: 24),
+            label: "Clubs",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/home_icon.png", height: 24),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/people.png", height: 24),
+            label: "Faculties",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/profile_icon.png", height: 24),
+            label: "Profile",
+          ),
         ],
       ),
     );

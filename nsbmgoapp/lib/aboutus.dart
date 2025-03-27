@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'main.dart';
-import 'event.dart';
-import 'club.dart';
+import 'event.dart' as event_lib;
+import 'club.dart' as club_lib;
+import 'profile.dart';
 
 class AboutUsScreen extends StatefulWidget {
   @override
@@ -13,28 +14,28 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
 
   void _onItemTapped(int index) {
     if (index == 0) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => NSBMHomePage()),
+        MaterialPageRoute(builder: (context) => event_lib.NSBMHomePage()),
       );
       return;
     } else if (index == 1) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ClubsPage()),
+        MaterialPageRoute(builder: (context) => club_lib.ClubsPage()),
       );
       return;
     } else if (index == 2) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
       );
       return;
     }
-    else if (index == 3) {
-      Navigator.push(
+    else if (index == 4) { // Profile tab
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AboutUsScreen()),
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
       );
       return;
     }
@@ -47,6 +48,20 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 120,
+        leadingWidth: 150,
+        leading: Padding(
+          padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
+          child: Image.asset(
+            "assets/logo.jpg",
+            fit: BoxFit.contain,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),

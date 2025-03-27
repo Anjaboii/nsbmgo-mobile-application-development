@@ -68,30 +68,26 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
       switch (selectedUserType) {
         case 0: // Student
-          collectionName = 'student';
-          final querySnapshot = await FirebaseFirestore.instance
-              .collection(collectionName)
-              .where('email', isEqualTo: email)
-              .limit(1)
+        // First authenticate with Firebase Auth
+          final authResult = await FirebaseAuth.instance.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+
+          // Then get additional data from Firestore
+          final userDoc = await FirebaseFirestore.instance
+              .collection('student')
+              .doc(authResult.user?.uid)
               .get();
 
-          if (querySnapshot.docs.isEmpty) {
+          if (!userDoc.exists) {
             throw FirebaseAuthException(
               code: 'user-not-found',
               message: 'No student found with that email.',
             );
           }
 
-          final userDoc = querySnapshot.docs.first;
-          final userData = userDoc.data();
-
-          if (userData['password'] != password) {
-            throw FirebaseAuthException(
-              code: 'wrong-password',
-              message: 'Incorrect password.',
-            );
-          }
-
+          final userData = userDoc.data()!;
           destination = HomePage(studentData: userData);
           break;
 

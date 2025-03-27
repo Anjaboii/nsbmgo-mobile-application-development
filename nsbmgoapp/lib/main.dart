@@ -4,9 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 import 'addevent.dart';
 import 'dart:math';
-import 'event.dart';
-import 'club.dart'; // Adjust the path if necessary
-import 'aboutus.dart';
+import 'event.dart' as event_lib;
+import 'club.dart' as club_lib;
+import 'aboutus.dart' as aboutus_lib;
+import 'profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       home: LoginScreen(),
       routes: {
         '/home': (context) => HomePage(),
-        '/addEvent': (context) => EventForm(organizerData: {})
+        '/addEvent': (context) => EventForm(organizerData: {}),
       },
     );
   }
@@ -72,7 +73,7 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Lastest Events",
+                Text("Latest Events",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ],
             ),
@@ -145,20 +146,25 @@ class _HomePageState extends State<HomePage> {
     if (index == 0) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => NSBMHomePage()),
+        MaterialPageRoute(builder: (context) => event_lib.NSBMHomePage()),
       );
       return;
     } else if (index == 1) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ClubsPage()),
+        MaterialPageRoute(builder: (context) => club_lib.ClubsPage()),
       );
       return;
-    }
-    else if (index == 3) {
+    } else if (index == 3) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => AboutUsScreen()),
+        MaterialPageRoute(builder: (context) => aboutus_lib.AboutUsScreen()),
+      );
+      return;
+    } else if (index == 4) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProfileScreen()),
       );
       return;
     }
@@ -176,7 +182,7 @@ class _HomePageState extends State<HomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EventDetailsPage(eventData: event),
+            builder: (context) => event_lib.EventDetailsPage(eventData: event),
           ),
         );
       },

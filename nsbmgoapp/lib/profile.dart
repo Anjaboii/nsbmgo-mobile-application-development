@@ -1,126 +1,163 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
-  runApp(MyApp());
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class MyApp extends StatelessWidget {
+class _ProfileScreenState extends State<ProfileScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  Map<String, dynamic>? _studentData;
+  bool _isLoading = true;
+  String _errorMessage = '';
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: ProfilePage(),
-    );
+  void initState() {
+    super.initState();
+    _fetchStudentData();
   }
-}
 
-class ProfilePage extends StatefulWidget {
-  @override
-  _ProfilePageState createState() => _ProfilePageState();
-}
+  Future<void> _fetchStudentData() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        setState(() {
+          _errorMessage = 'No user logged in';
+          _isLoading = false;
+        });
+        return;
+      }
 
-class _ProfilePageState extends State<ProfilePage> {
-  int _selectedIndex = 4; // Profile tab selected by default
+      final doc = await _firestore.collection('student').doc(user.uid).get();
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+      if (!doc.exists) {
+        setState(() {
+          _errorMessage = 'Student data not found';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _studentData = doc.data();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error fetching data: ${e.toString()}';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Full white background
-      body: Column(
-        children: [
-          SizedBox(height: 60), // Increased space for layout adjustment
+      appBar: AppBar(
+        title: Text('Profile'),
+        backgroundColor: Colors.green,
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _errorMessage.isNotEmpty
+          ? Center(child: Text(_errorMessage))
+          : _buildProfileContent(),
+    );
+  }
 
-          // Profile Image
+  Widget _buildProfileContent() {
+    final dateOfBirth = (_studentData!['dateofbirth'] as Timestamp).toDate();
+    final formattedDate = '${dateOfBirth.day} ${_getMonthName(dateOfBirth.month)} ${dateOfBirth.year}';
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
           CircleAvatar(
             radius: 50,
-            backgroundColor: Colors.grey[300],
-            child: Icon(Icons.person, size: 50, color: Colors.black54),
+            backgroundColor: Colors.grey.shade200,
+            child: _studentData!['image'] != null && _studentData!['image'].isNotEmpty
+                ? ClipOval(
+              child: Image.network(
+                _studentData!['image'],
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
+            )
+                : Icon(
+              Icons.person,
+              size: 50,
+              color: Colors.grey,
+            ),
           ),
-
           SizedBox(height: 20),
-
-          // Name and ID
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.green[200],
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2)),
-              ],
-            ),
-            child: Column(
-              children: [
-                Text("Kavindu Heshan", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Text("29812", style: TextStyle(fontSize: 14, color: Colors.black87)),
-              ],
-            ),
+          Text(
+            _studentData!['name'] ?? 'No Name',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-
+          SizedBox(height: 5),
+          Text(
+            _studentData!['studentid'] ?? 'No ID',
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
           SizedBox(height: 30),
-
-          // Profile Details
-          profileInfoCard("Email", "kdesilva728@gmail.com"),
-          profileInfoCard("Intake", "23.1"),
-          profileInfoCard("Faculty", "Faculty of Computing"),
-          profileInfoCard("Degree", "BSc(Hons) Software Engineering"),
-
-          Spacer(),
-
-          // Bottom Navigation Bar
-          BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            selectedItemColor: Colors.black,
-            unselectedItemColor: Colors.black54,
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
-            items: [
-              BottomNavigationBarItem(icon: Image.asset("assets/events_icon.png", height: 24), label: "Events"),
-              BottomNavigationBarItem(icon: Image.asset("assets/clubs_icon.png", height: 24), label: "Clubs"),
-              BottomNavigationBarItem(icon: Image.asset("assets/home_icon.png", height: 24), label: "Home"),
-              BottomNavigationBarItem(icon: Image.asset("assets/faculties_icon.png", height: 24), label: "Faculties"),
-              BottomNavigationBarItem(icon: Image.asset("assets/profile_icon.png", height: 24), label: "Profile"),
-            ],
+          _buildInfoCard(
+            icon: Icons.email,
+            title: 'Email',
+            value: _studentData!['email'] ?? 'No Email',
+          ),
+          _buildInfoCard(
+            icon: Icons.cake,
+            title: 'Date of Birth',
+            value: formattedDate,
+          ),
+          _buildInfoCard(
+            icon: Icons.school,
+            title: 'Intake',
+            value: _studentData!['intake'] ?? 'No Intake',
+          ),
+          _buildInfoCard(
+            icon: Icons.account_balance,
+            title: 'Faculty',
+            value: 'Faculty of Computing',
+          ),
+          _buildInfoCard(
+            icon: Icons.assignment,
+            title: 'Degree',
+            value: _studentData!['degree'] ?? 'No Degree',
+          ),
+          _buildInfoCard(
+            icon: Icons.phone,
+            title: 'Phone',
+            value: _studentData!['phoneno'] ?? 'No Phone',
           ),
         ],
       ),
     );
   }
 
-  // Profile Info Card
-  Widget profileInfoCard(String title, String value) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // Increased vertical margin
-      padding: EdgeInsets.all(12),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.green[200], // Greenish background
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "$title :",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-          ),
-          SizedBox(height: 5),
-          Text(
-            value,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
-          ),
-        ],
+  Widget _buildInfoCard({required IconData icon, required String title, required String value}) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.green),
+        title: Text(title, style: TextStyle(color: Colors.grey)),
+        subtitle: Text(value, style: TextStyle(fontSize: 16)),
       ),
     );
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return months[month - 1];
   }
 }

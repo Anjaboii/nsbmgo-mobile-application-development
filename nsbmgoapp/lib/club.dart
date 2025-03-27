@@ -3,16 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'main.dart'; // Make sure to import your home page file
-import 'event.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MaterialApp(
-    home: ClubsPage(),
-  ));
-}
+import 'main.dart';
+import 'event.dart' as event_lib;
+import 'aboutus.dart' as aboutus_lib;
+import 'profile.dart';
 
 class ClubsPage extends StatefulWidget {
   const ClubsPage({Key? key}) : super(key: key);
@@ -115,7 +109,7 @@ class _ClubsPageState extends State<ClubsPage> {
       case 0: // Events
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => NSBMHomePage()),
+          MaterialPageRoute(builder: (context) => event_lib.NSBMHomePage()),
         );
         break;
       case 1: // Clubs - do nothing, we're already here
@@ -127,16 +121,16 @@ class _ClubsPageState extends State<ClubsPage> {
         );
         break;
       case 3: // Faculties
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => FacultiesPage()),
-      // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => aboutus_lib.AboutUsScreen()),
+        );
         break;
       case 4: // Profile
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ProfilePage()),
-      // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
+        );
         break;
     }
   }
