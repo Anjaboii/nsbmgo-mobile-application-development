@@ -67,30 +67,9 @@ flutter:
     - assets\faculties_icon.png
     - assets\events_icon.png
     - assets\clubs_icon.png
-    - assets\logo image.png
     - assets\people.png
     - assets\nsbmlogo.png
     - assets\logo.jpg
-    - assets\Cover.png
-    - assets\SP.jpg
-    - assets\GF.jpg
-    - assets\HM.jpg
-    - assets\SI.jpg
-    - assets\LC.jpg
-    - assets\EC.webp
-    - assets\AF.jpg
-    - assets\IC.webp
-    - assets\EL.jpg
-    - assets\YB.jpg
-    - assets\FOC.jpg
-    - assets\FOB.jpeg
-    - assets\FOS.jpg
-    - assets\FOE.png
-    - assets\PC.png
-    - assets\CL.png
-    - assets\SF.jpg
-    - assets\NF.jpg
-    - assets\logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

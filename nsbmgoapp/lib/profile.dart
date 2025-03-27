@@ -99,31 +99,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.black,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
+        unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarItem(
-            icon: Image.asset("assets/events_icon.png", height: 28, color: Colors.black),
-            label: "",
+            icon: Image.asset("assets/events_icon.png", height: 24, color: Colors.black),
+            label: "Events",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/clubs_icon.png", height: 28, color: Colors.black),
-            label: "",
+            icon: Image.asset("assets/clubs_icon.png", height: 24, color: Colors.black),
+            label: "Clubs",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/home_icon.png", height: 28, color: Colors.black),
-            label: "",
+            icon: Image.asset("assets/home_icon.png", height: 24, color: Colors.black),
+            label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/people.png", height: 28, color: Colors.black),
-            label: "",
+            icon: Image.asset("assets/people.png", height: 24, color: Colors.black),
+            label: "Faculties",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/profile_icon.png", height: 28, color: Colors.black),
-            label: "",
+            icon: Image.asset("assets/profile_icon.png", height: 24, color: Colors.black),
+            label: "Profile",
           ),
         ],
       ),
@@ -141,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: EdgeInsets.only(top: 50, bottom: 30, left: 20, right: 20),
             decoration: BoxDecoration(
-              color: Color(0xFF9AD3A1),
+              color: Color(0xFF4CAF50),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -250,7 +247,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: ListTile(
-        leading: Icon(icon, color: Color(0xFF9AD3A1), size: 32),  // Larger icon
+        leading: Icon(icon, color: Color(0xFF4CAF50), size: 32),  // Larger icon
         title: Text(
           title,
           style: TextStyle(

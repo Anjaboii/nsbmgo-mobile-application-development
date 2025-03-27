@@ -48,20 +48,6 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        toolbarHeight: 120,
-        leadingWidth: 150,
-        leading: Padding(
-          padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
-          child: Image.asset(
-            "assets/logo.jpg",
-            fit: BoxFit.contain,
-          ),
-        ),
-        centerTitle: true,
-      ),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -110,25 +96,27 @@ class _AboutUsScreenState extends State<AboutUsScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarItem(
-            icon: Image.asset("assets/events_icon.png", height: 24),
+            icon: Image.asset("assets/events_icon.png", height: 24, color: Colors.black),
             label: "Events",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/clubs_icon.png", height: 24),
+            icon: Image.asset("assets/clubs_icon.png", height: 24, color: Colors.black),
             label: "Clubs",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/home_icon.png", height: 24),
+            icon: Image.asset("assets/home_icon.png", height: 24, color: Colors.black),
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/people.png", height: 24),
-            label: "Faculties",
+            icon: Image.asset("assets/people.png", height: 24, color: Colors.black),
+            label: "About Us",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/profile_icon.png", height: 24),
+            icon: Image.asset("assets/profile_icon.png", height: 24, color: Colors.black),
             label: "Profile",
           ),
         ],

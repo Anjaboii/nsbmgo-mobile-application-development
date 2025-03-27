@@ -72,25 +72,27 @@ class _ClubsPageState extends State<ClubsPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
         items: [
           BottomNavigationBarItem(
-            icon: Image.asset("assets/events_icon.png", height: 24),
+            icon: Image.asset("assets/events_icon.png", height: 24, color: Colors.black),
             label: "Events",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/clubs_icon.png", height: 24),
+            icon: Image.asset("assets/clubs_icon.png", height: 24, color: Colors.black),
             label: "Clubs",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/home_icon.png", height: 24),
+            icon: Image.asset("assets/home_icon.png", height: 24, color: Colors.black),
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/people.png", height: 24),
-            label: "Faculties",
+            icon: Image.asset("assets/people.png", height: 24, color: Colors.black),
+            label: "About Us",
           ),
           BottomNavigationBarItem(
-            icon: Image.asset("assets/profile_icon.png", height: 24),
+            icon: Image.asset("assets/profile_icon.png", height: 24, color: Colors.black),
             label: "Profile",
           ),
         ],
@@ -356,26 +358,6 @@ class ClubDetailsPage extends StatelessWidget {
             _buildContactInfo(Icons.email, clubData['mail'] ?? 'No email provided'),
             _buildContactInfo(Icons.phone, clubData['contactnumber'] ?? 'No phone number provided'),
             if (clubData['url'] != null && clubData['url'].isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: InkWell(
-                  onTap: () => _launchURL(clubData['url']),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.link, size: 20, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Visit Website',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.blue[600],
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             const SizedBox(height: 20),
           ],
         ),
