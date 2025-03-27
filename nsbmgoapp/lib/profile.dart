@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'event.dart' as event_lib;
+import 'club.dart' as club_lib;
+import 'aboutus.dart' as aboutus_lib;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -15,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _studentData;
   bool _isLoading = true;
   String _errorMessage = '';
+  int _selectedIndex = 4;
 
   @override
   void initState() {
@@ -55,18 +59,74 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => event_lib.NSBMHomePage()),
+      );
+      return;
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => club_lib.ClubsPage()),
+      );
+      return;
+    } else if (index == 2) {
+      Navigator.pushNamed(context, '/home');
+      return;
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => aboutus_lib.AboutUsScreen()),
+      );
+      return;
+    }
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Colors.green,
-      ),
+      backgroundColor: Colors.white,
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : _errorMessage.isNotEmpty
           ? Center(child: Text(_errorMessage))
           : _buildProfileContent(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.black,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        items: [
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/events_icon.png", height: 28, color: Colors.black),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/clubs_icon.png", height: 28, color: Colors.black),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/home_icon.png", height: 28, color: Colors.black),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/people.png", height: 28, color: Colors.black),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset("assets/profile_icon.png", height: 28, color: Colors.black),
+            label: "",
+          ),
+        ],
+      ),
     );
   }
 
@@ -75,80 +135,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final formattedDate = '${dateOfBirth.day} ${_getMonthName(dateOfBirth.month)} ${dateOfBirth.year}';
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.grey.shade200,
-            child: _studentData!['image'] != null && _studentData!['image'].isNotEmpty
-                ? ClipOval(
-              child: Image.network(
-                _studentData!['image'],
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+          // Profile Header with larger photo moved down
+          Container(
+            padding: EdgeInsets.only(top: 50, bottom: 30, left: 20, right: 20),
+            decoration: BoxDecoration(
+              color: Color(0xFF9AD3A1),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
-            )
-                : Icon(
-              Icons.person,
-              size: 50,
-              color: Colors.grey,
+            ),
+            child: Column(
+              children: [
+                Center(
+                  child: CircleAvatar(
+                    radius: 80,  // Increased size
+                    backgroundColor: Colors.white,
+                    child: _studentData!['image'] != null && _studentData!['image'].isNotEmpty
+                        ? ClipOval(
+                      child: Image.network(
+                        _studentData!['image'],
+                        width: 150,  // Increased size
+                        height: 150, // Increased size
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                        : Icon(
+                      Icons.person,
+                      size: 80,  // Increased size
+                      color: Color(0xFF9AD3A1),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 25),  // Increased spacing
+                Text(
+                  _studentData!['name'] ?? 'No Name',
+                  style: TextStyle(
+                    fontSize: 26,  // Slightly larger
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  _studentData!['studentid'] ?? 'No ID',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,  // Made student ID bold
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 20),
-          Text(
-            _studentData!['name'] ?? 'No Name',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 5),
-          Text(
-            _studentData!['studentid'] ?? 'No ID',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          SizedBox(height: 30),
-          _buildInfoCard(
-            icon: Icons.email,
-            title: 'Email',
-            value: _studentData!['email'] ?? 'No Email',
-          ),
-          _buildInfoCard(
-            icon: Icons.cake,
-            title: 'Date of Birth',
-            value: formattedDate,
-          ),
-          _buildInfoCard(
-            icon: Icons.school,
-            title: 'Intake',
-            value: _studentData!['intake'] ?? 'No Intake',
-          ),
-          _buildInfoCard(
-            icon: Icons.account_balance,
-            title: 'Faculty',
-            value: 'Faculty of Computing',
-          ),
-          _buildInfoCard(
-            icon: Icons.assignment,
-            title: 'Degree',
-            value: _studentData!['degree'] ?? 'No Degree',
-          ),
-          _buildInfoCard(
-            icon: Icons.phone,
-            title: 'Phone',
-            value: _studentData!['phoneno'] ?? 'No Phone',
+
+          // Profile Details
+          Padding(
+            padding: EdgeInsets.all(25),  // Increased padding
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildDetailCard(
+                  icon: Icons.email,
+                  title: 'Email',
+                  value: _studentData!['email'] ?? 'No Email',
+                ),
+                _buildDetailCard(
+                  icon: Icons.cake,
+                  title: 'Date of Birth',
+                  value: formattedDate,
+                ),
+                _buildDetailCard(
+                  icon: Icons.school,
+                  title: 'Intake',
+                  value: _studentData!['intake'] ?? 'No Intake',
+                ),
+                _buildDetailCard(
+                  icon: Icons.account_balance,
+                  title: 'Faculty',
+                  value: 'Faculty of Computing',
+                ),
+                _buildDetailCard(
+                  icon: Icons.assignment,
+                  title: 'Degree',
+                  value: _studentData!['degree'] ?? 'No Degree',
+                ),
+                _buildDetailCard(
+                  icon: Icons.phone,
+                  title: 'Phone',
+                  value: _studentData!['phoneno'] ?? 'No Phone',
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard({required IconData icon, required String title, required String value}) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+  Widget _buildDetailCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),  // Increased spacing
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),  // Slightly more rounded
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 6,  // Softer shadow
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
       child: ListTile(
-        leading: Icon(icon, color: Colors.green),
-        title: Text(title, style: TextStyle(color: Colors.grey)),
-        subtitle: Text(value, style: TextStyle(fontSize: 16)),
+        leading: Icon(icon, color: Color(0xFF9AD3A1), size: 32),  // Larger icon
+        title: Text(
+          title,
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,  // Slightly larger
+          ),
+        ),
+        subtitle: Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,  // Larger text
+            color: Colors.black87,  // Darker for better readability
+          ),
+        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),  // More padding
       ),
     );
   }
